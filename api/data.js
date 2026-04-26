@@ -26,7 +26,7 @@ module.exports = async function handler(req, res) {
   if (req.method === "OPTIONS") return res.status(200).end();
 
   const key = (req.query.key || "").trim();
-  if (!key || key.length < 8) {
+  if (!key || key.length < 6) {
     return res.status(400).json({ error: "invalid key" });
   }
 
