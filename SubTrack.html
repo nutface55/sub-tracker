@@ -424,6 +424,45 @@ footer.foot .dotgap{color:var(--muted-2)}
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--line-strong);border-radius:4px}
+
+/* ── passcode screen ─────────────────────────────────────────────── */
+#passcode-screen{
+  position:fixed;inset:0;background:var(--bg);z-index:200;
+  display:flex;align-items:center;justify-content:center;
+  padding:24px;
+}
+#passcode-screen.hidden{display:none}
+.pc-box{
+  display:flex;flex-direction:column;align-items:center;gap:20px;
+  width:100%;max-width:320px;
+}
+.pc-logo{
+  width:24px;height:24px;border:2px solid var(--fg);border-radius:4px;
+  position:relative;flex-shrink:0;
+}
+.pc-logo::after{content:"";position:absolute;left:4px;right:4px;top:10px;height:2px;background:var(--fg)}
+.pc-title{font-size:16px;font-weight:600;letter-spacing:-.01em}
+.pc-desc{font-size:12px;color:var(--muted);text-align:center;line-height:1.6;margin-top:-8px}
+.pc-input-wrap{position:relative;width:100%}
+.pc-input-wrap input{
+  width:100%;font-family:inherit;font-size:22px;font-weight:500;
+  letter-spacing:.18em;text-align:center;
+  padding:12px 14px;border:1px solid var(--line-strong);
+  background:var(--bg);border-radius:4px;color:var(--fg);outline:none;
+  -moz-appearance:textfield;
+}
+.pc-input-wrap input::-webkit-outer-spin-button,
+.pc-input-wrap input::-webkit-inner-spin-button{-webkit-appearance:none}
+.pc-input-wrap input:focus{border-color:var(--fg)}
+.pc-input-wrap input.invalid{border-color:var(--red)}
+.pc-err{font-size:11px;color:var(--red);min-height:16px;text-align:center}
+.pc-btn{
+  width:100%;font-family:inherit;font-size:13px;font-weight:500;
+  padding:10px;border-radius:3px;border:none;cursor:pointer;
+  background:var(--fg);color:var(--bg);
+}
+.pc-btn:hover{opacity:.88}
+.pc-hint{font-size:11px;color:var(--muted-2);text-align:center;line-height:1.6}
 </style>
 </head>
 <body>
@@ -669,11 +708,26 @@ footer.foot .dotgap{color:var(--muted-2)}
   </div>
 </div>
 
-<script src="st-data.js?v=5"></script>
-<script src="st-render.js?v=5"></script>
-<script src="st-panel.js?v=5"></script>
-<script src="st-views.js?v=5"></script>
-<script src="st-init.js?v=5"></script>
+<!-- ── passcode screen ── -->
+<div id="passcode-screen" class="hidden">
+  <div class="pc-box">
+    <span class="pc-logo" aria-hidden="true"></span>
+    <span class="pc-title">subtrack</span>
+    <p class="pc-desc">Enter your 8-digit passcode.<br>Use the same passcode on every device to sync your data.</p>
+    <div class="pc-input-wrap">
+      <input id="pc-input" type="number" inputmode="numeric" placeholder="00000000" maxlength="8" autocomplete="off" />
+    </div>
+    <div class="pc-err" id="pc-err"></div>
+    <button class="pc-btn" id="pc-submit">access subtrack</button>
+    <p class="pc-hint">your passcode never leaves your devices —<br>it's only used as a sync key</p>
+  </div>
+</div>
+
+<script src="st-data.js?v=7"></script>
+<script src="st-render.js?v=7"></script>
+<script src="st-panel.js?v=7"></script>
+<script src="st-views.js?v=7"></script>
+<script src="st-init.js?v=7"></script>
 <script>
   // wire shortcuts link after scripts loaded
   document.getElementById("shortcuts-link").onclick = openShortcuts;

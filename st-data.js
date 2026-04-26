@@ -51,10 +51,45 @@ window.visibleSubs = () => {
 };
 
 // ── user key (sync identity) ──────────────────────────────────────────
+// Returns the stored passcode, or null if not set yet.
 window.getUserKey = () => {
-  let k = localStorage.getItem("subtrack.userkey");
-  if (!k) { k = crypto.randomUUID(); localStorage.setItem("subtrack.userkey", k); }
-  return k;
+  const k = localStorage.getItem("subtrack.userkey") || "";
+  // treat UUIDs (old format) as "not set" so passcode screen appears
+  return (k && !k.includes("-")) ? k : null;
+};
+
+window.showPasscodeScreen = () => {
+  const screen = document.getElementById("passcode-screen");
+  if (!screen) return;
+  screen.classList.remove("hidden");
+  setTimeout(() => document.getElementById("pc-input").focus(), 80);
+
+  document.getElementById("pc-submit").onclick = submitPasscode;
+  document.getElementById("pc-input").addEventListener("keydown", e => {
+    if (e.key === "Enter") submitPasscode();
+    // block non-numeric keys (allow backspace, tab, arrows)
+    if (!/^\d$/.test(e.key) && !["Backspace","Delete","Tab","ArrowLeft","ArrowRight"].includes(e.key) && !e.metaKey && !e.ctrlKey) {
+      e.preventDefault();
+    }
+  });
+  document.getElementById("pc-input").addEventListener("input", e => {
+    // clamp to 8 digits
+    if (e.target.value.length > 8) e.target.value = e.target.value.slice(0, 8);
+    e.target.classList.remove("invalid");
+    document.getElementById("pc-err").textContent = "";
+  });
+};
+
+function submitPasscode() {
+  const raw = document.getElementById("pc-input").value.replace(/\D/g,"");
+  if (raw.length !== 8) {
+    document.getElementById("pc-input").classList.add("invalid");
+    document.getElementById("pc-err").textContent = "enter exactly 8 digits";
+    return;
+  }
+  localStorage.setItem("subtrack.userkey", raw);
+  document.getElementById("passcode-screen").classList.add("hidden");
+  loadState();
 };
 
 // ── persistence ───────────────────────────────────────────────────────
@@ -87,6 +122,9 @@ window.persist = () => {
 
 // load from server; fall back to localStorage then seed
 window.loadState = async () => {
+  const key = getUserKey();
+  if (!key) { showPasscodeScreen(); return; }
+
   // apply localStorage immediately so UI isn't blank while fetching
   const v2 = localStorage.getItem("subtrack.v2");
   if (v2) {
@@ -97,25 +135,23 @@ window.loadState = async () => {
     } catch {}
   }
   if (STATE.dark) document.getElementById("root").setAttribute("data-dark","1");
+  renderAll();
 
-  // then fetch from server and re-render if data differs
+  // fetch from server and re-render with latest data
   try {
-    const res = await fetch("/api/data?key=" + getUserKey());
+    const res = await fetch("/api/data?key=" + key);
     if (!res.ok) throw new Error();
     const d = await res.json();
     if (d.fresh && !v2) {
-      // brand-new key and no local data → show seed
       SUBS = SEED_DATA.map(normSub);
     } else if (!d.fresh) {
       SUBS   = (d.subs||[]).map(normSub);
       RATES  = {...CURRENCY_BASE,...(d.rates||{})};
       BUDGET = d.budget||0;
       STATE.dark = !!d.dark;
-      // keep server copy in sync with localStorage
       try { localStorage.setItem("subtrack.v2", JSON.stringify({subs:SUBS,rates:RATES,budget:BUDGET,dark:STATE.dark})); } catch {}
     }
   } catch {
-    // server unreachable — already showing localStorage/seed data
     if (!v2) SUBS = SEED_DATA.map(normSub);
   }
 
@@ -125,13 +161,23 @@ window.loadState = async () => {
   renderSyncKey();
 };
 
-// show sync key in footer so user can copy it to other devices
+// show passcode (masked) in footer; click to change
 window.renderSyncKey = () => {
   const el = document.getElementById("sync-key-display");
   if (!el) return;
-  const k = getUserKey();
-  el.textContent = k.slice(0,8) + "…";
-  el.title = "your sync key: " + k + "\n\nCopy this to another device to access the same data.";
+  el.textContent = "passcode: ••••••••";
+  el.title = "click to change passcode";
+  el.style.cursor = "pointer";
+  el.onclick = () => {
+    const input = prompt("Enter a new 8-digit passcode:\n(changing this will switch you to a different data set)");
+    if (input === null) return;
+    const raw = input.replace(/\D/g,"");
+    if (raw.length !== 8) { alert("Please enter exactly 8 digits."); return; }
+    localStorage.setItem("subtrack.userkey", raw);
+    localStorage.removeItem("subtrack.v2");
+    flashMsg("passcode changed — reloading…");
+    setTimeout(() => location.reload(), 800);
+  };
 };
 
 // ── seed ──────────────────────────────────────────────────────────────
