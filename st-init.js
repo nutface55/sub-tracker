@@ -1,7 +1,7 @@
 // SubTrack — Event Listeners & Init
 
-window.initApp = () => {
-  loadState();
+window.initApp = async () => {
+  // loadState now fetches from server; it calls renderAll() itself when done
 
   // ── show mobile header tools on small screens ──────────────────────
   const updateHeaderTools = () => {
@@ -102,11 +102,21 @@ window.initApp = () => {
     }
   });
 
-  renderAll();
   // default view based on viewport
   const isMobile=window.innerWidth<=767;
   document.getElementById("tbl-wrap").style.display=isMobile?"none":"";
   document.getElementById("cards").style.display=isMobile?"":"none";
+
+  // wire sync key copy
+  const syncKeyEl = document.getElementById("sync-key-display");
+  if (syncKeyEl) {
+    syncKeyEl.onclick = () => {
+      navigator.clipboard.writeText(getUserKey()).then(() => flashMsg("sync key copied!")).catch(()=>{});
+    };
+  }
+
+  // loadState fetches from server + calls renderAll when ready
+  await loadState();
 };
 
 document.addEventListener("DOMContentLoaded", initApp);

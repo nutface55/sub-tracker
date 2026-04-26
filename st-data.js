@@ -50,6 +50,13 @@ window.visibleSubs = () => {
   return list;
 };
 
+// ── user key (sync identity) ──────────────────────────────────────────
+window.getUserKey = () => {
+  let k = localStorage.getItem("subtrack.userkey");
+  if (!k) { k = crypto.randomUUID(); localStorage.setItem("subtrack.userkey", k); }
+  return k;
+};
+
 // ── persistence ───────────────────────────────────────────────────────
 window.normSub = s => ({
   id:s.id||uid(), name:s.name||"", plan:s.plan||"",
@@ -64,18 +71,67 @@ window.normSub = s => ({
   priceHistory:s.priceHistory||[],
 });
 
+// write to localStorage immediately, push to server debounced
+let _syncTimer;
 window.persist = () => {
-  try { localStorage.setItem("subtrack.v2",JSON.stringify({subs:SUBS,rates:RATES,budget:BUDGET,dark:STATE.dark})); } catch {}
+  const payload = { subs:SUBS, rates:RATES, budget:BUDGET, dark:STATE.dark };
+  try { localStorage.setItem("subtrack.v2", JSON.stringify(payload)); } catch {}
+  clearTimeout(_syncTimer);
+  _syncTimer = setTimeout(() => {
+    fetch("/api/data?key=" + getUserKey(), {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify(payload),
+    }).catch(() => {}); // silent — localStorage already saved
+  }, 600);
 };
 
-window.loadState = () => {
-  const v2=localStorage.getItem("subtrack.v2"), v1=localStorage.getItem("subtrack.v1");
+// load from server; fall back to localStorage then seed
+window.loadState = async () => {
+  // apply localStorage immediately so UI isn't blank while fetching
+  const v2 = localStorage.getItem("subtrack.v2");
+  if (v2) {
+    try {
+      const d = JSON.parse(v2);
+      SUBS = d.subs.map(normSub); RATES = {...CURRENCY_BASE,...d.rates};
+      BUDGET = d.budget||0; STATE.dark = !!d.dark;
+    } catch {}
+  }
+  if (STATE.dark) document.getElementById("root").setAttribute("data-dark","1");
+
+  // then fetch from server and re-render if data differs
   try {
-    if(v2){ const d=JSON.parse(v2); SUBS=d.subs.map(normSub); RATES={...CURRENCY_BASE,...d.rates}; BUDGET=d.budget||0; STATE.dark=!!d.dark; }
-    else if(v1){ SUBS=JSON.parse(v1).map(s=>normSub({...s,currency:"USD"})); }
-    else { SUBS=SEED_DATA.map(normSub); }
-  } catch { SUBS=SEED_DATA.map(normSub); }
-  if(STATE.dark) document.getElementById("root").dataset.dark="1";
+    const res = await fetch("/api/data?key=" + getUserKey());
+    if (!res.ok) throw new Error();
+    const d = await res.json();
+    if (d.fresh && !v2) {
+      // brand-new key and no local data → show seed
+      SUBS = SEED_DATA.map(normSub);
+    } else if (!d.fresh) {
+      SUBS   = (d.subs||[]).map(normSub);
+      RATES  = {...CURRENCY_BASE,...(d.rates||{})};
+      BUDGET = d.budget||0;
+      STATE.dark = !!d.dark;
+      // keep server copy in sync with localStorage
+      try { localStorage.setItem("subtrack.v2", JSON.stringify({subs:SUBS,rates:RATES,budget:BUDGET,dark:STATE.dark})); } catch {}
+    }
+  } catch {
+    // server unreachable — already showing localStorage/seed data
+    if (!v2) SUBS = SEED_DATA.map(normSub);
+  }
+
+  if (STATE.dark) document.getElementById("root").setAttribute("data-dark","1");
+  else document.getElementById("root").removeAttribute("data-dark");
+  renderAll();
+  renderSyncKey();
+};
+
+// show sync key in footer so user can copy it to other devices
+window.renderSyncKey = () => {
+  const el = document.getElementById("sync-key-display");
+  if (!el) return;
+  const k = getUserKey();
+  el.textContent = k.slice(0,8) + "…";
+  el.title = "your sync key: " + k + "\n\nCopy this to another device to access the same data.";
 };
 
 // ── seed ──────────────────────────────────────────────────────────────
