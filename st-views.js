@@ -93,7 +93,9 @@ window.renderCalendar = () => {
       const r=parseDate(s.renews);
       return r.getMonth()===m.month && r.getFullYear()===m.year;
     });
-    const total = subs.reduce((t,s)=>t+(s.status==="active"?annualTHB(s):0),0);
+    // actual cash out this month: monthly subs → monthly cost, annual → annual cost
+    const actualCost = s => s.cycle==="annual" ? annualTHB(s) : monthlyTHB(s);
+    const total = subs.reduce((t,s)=>t+(s.status==="active"?actualCost(s):0),0);
     const isCurrent = m.month===TODAY.getMonth()&&m.year===TODAY.getFullYear();
     return `<div class="cal-month ${isCurrent?"current":""}">
       <div class="cal-head">
@@ -104,7 +106,7 @@ window.renderCalendar = () => {
         ? subs.map(s=>`<div class="cal-sub ${s.status==="paused"?"paused":""}" title="${escapeHTML(s.name)}">
             <span class="cal-dot" style="background:${s.color}"></span>
             <span class="cal-name">${escapeHTML(s.name)}</span>
-            <span class="cal-cost">${fmt(annualTHB(s))}/yr</span>
+            <span class="cal-cost">${fmt(actualCost(s))}/${s.cycle==="annual"?"yr":"mo"}</span>
           </div>`).join("")
         : `<div class="cal-empty">—</div>`
       }
