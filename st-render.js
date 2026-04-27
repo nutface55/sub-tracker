@@ -4,6 +4,7 @@ window.renderAll = () => {
   renderStats();
   renderTabs();
   renderCatFilters();
+  renderHeader();
   renderRows();
   renderFooter();
   if(STATE.view==="chart")    renderChart();
@@ -62,6 +63,33 @@ window.renderCatFilters = () => {
 };
 
 // ── table rows ────────────────────────────────────────────────────────
+window.renderHeader = () => {
+  const s = STATE.sortCol, d = STATE.sortDir;
+  const arr = col => s===col ? (d==="asc"?" ↑":" ↓") : "";
+  const th = (col, label, cls="") =>
+    `<th class="${cls}" data-sort="${col}" style="cursor:pointer;user-select:none">${label}${arr(col)}</th>`;
+
+  document.querySelector("#tbl thead tr").innerHTML = `
+    <th style="width:14px;padding:8px 4px"></th>
+    ${th("name","name","col-name")}
+    ${th("cycle","cycle","col-cycle")}
+    ${th("monthly","monthly ","col-monthly num")}
+    ${th("annual","annual","num")}
+    ${th("renew","next renewal","col-renew")}
+    ${th("card","card","col-card-exp")}
+    <th></th>
+  `;
+  document.querySelectorAll("#tbl thead th[data-sort]").forEach(th=>{
+    th.addEventListener("click", ()=>{
+      const col=th.dataset.sort;
+      if(STATE.sortCol===col) STATE.sortDir=STATE.sortDir==="asc"?"desc":"asc";
+      else { STATE.sortCol=col; STATE.sortDir=col==="name"||col==="renew"?"asc":"desc"; }
+      renderHeader();
+      renderRows();
+    });
+  });
+};
+
 window.renderRows = () => {
   const list = visibleSubs();
   const tbody = document.getElementById("rows");

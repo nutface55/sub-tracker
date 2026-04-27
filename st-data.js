@@ -24,7 +24,7 @@ window.TODAY = new Date();
 window.SUBS   = [];
 window.RATES  = { ...CURRENCY_BASE };
 window.BUDGET = 0;
-window.STATE  = { filter:"all", query:"", catFilter:"", view:"list", dark:false };
+window.STATE  = { filter:"all", query:"", catFilter:"", view:"list", dark:false, sortCol:"monthly", sortDir:"desc" };
 
 // ── helpers ───────────────────────────────────────────────────────────
 window.uid        = () => "s"+Math.random().toString(36).slice(2,9);
@@ -57,7 +57,17 @@ window.visibleSubs = () => {
   if(STATE.filter==="paused") list=list.filter(s=>s.status==="paused");
   if(STATE.catFilter) list=list.filter(s=>s.category===STATE.catFilter);
   if(STATE.query.trim()){const q=STATE.query.trim().toLowerCase();list=list.filter(s=>s.name.toLowerCase().includes(q)||(s.plan||"").toLowerCase().includes(q));}
-  list.sort((a,b)=>monthlyTHB(b)-monthlyTHB(a));
+  const dir = STATE.sortDir==="asc" ? 1 : -1;
+  list.sort((a,b)=>{
+    switch(STATE.sortCol){
+      case "name":    return dir*(a.name.localeCompare(b.name));
+      case "cycle":   return dir*(a.cycle.localeCompare(b.cycle));
+      case "annual":  return dir*(annualTHB(a)-annualTHB(b));
+      case "renew":   return dir*(parseDate(a.renews)-parseDate(b.renews));
+      case "card":    return dir*((a.cardExpiry||"").localeCompare(b.cardExpiry||""));
+      default:        return dir*(monthlyTHB(a)-monthlyTHB(b)); // "monthly"
+    }
+  });
   return list;
 };
 
