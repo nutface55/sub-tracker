@@ -106,6 +106,28 @@ window.normSub = s => ({
   priceHistory:s.priceHistory||[],
 });
 
+// ── auto-advance renewals ─────────────────────────────────────────────
+// For active subs whose renewal date has passed, bump forward by the
+// billing cycle until it's in the future. Returns true if anything changed.
+window.autoAdvanceRenewals = () => {
+  let changed = false;
+  SUBS.forEach(s => {
+    if (s.status !== "active" || !s.renews) return;
+    let d = parseDate(s.renews);
+    if (d >= TODAY) return;
+    while (d < TODAY) {
+      if (s.cycle === "annual") {
+        d = new Date(d.getFullYear() + 1, d.getMonth(), d.getDate());
+      } else {
+        d = new Date(d.getFullYear(), d.getMonth() + 1, d.getDate());
+      }
+    }
+    s.renews = toISO(d);
+    changed = true;
+  });
+  return changed;
+};
+
 // write to localStorage immediately, push to server debounced
 let _syncTimer;
 window.persist = () => {
@@ -154,6 +176,8 @@ window.loadState = async () => {
   } catch {
     if (!v2) SUBS = SEED_DATA.map(normSub);
   }
+
+  if (autoAdvanceRenewals()) persist(); // save bumped dates immediately
 
   if (STATE.dark) document.getElementById("root").setAttribute("data-dark","1");
   else document.getElementById("root").removeAttribute("data-dark");
