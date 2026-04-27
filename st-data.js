@@ -103,6 +103,7 @@ window.normSub = s => ({
   reminder:Number(s.reminder)||0,
   splitWith:Number(s.splitWith)||1,
   currency:s.currency||"THB",
+  card:s.card||"",
   priceHistory:s.priceHistory||[],
 });
 

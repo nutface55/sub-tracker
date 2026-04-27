@@ -106,6 +106,7 @@ window.rowHTML = s => {
         <span class="label">${escapeHTML(s.name)}</span>
         ${s.plan?`<span class="meta">· ${escapeHTML(s.plan)}</span>`:""}
         ${catChip(s)}${badges(s)}
+        ${s.card?`<span class="meta" style="margin-left:4px">· ${escapeHTML(s.card)}</span>`:""}
       </div>
     </td>
     <td class="col-cycle"><span class="cycle ${s.cycle==="annual"?"annual":""}">${s.cycle}</span></td>
@@ -140,6 +141,7 @@ window.cardHTML = s => {
       <span>${s.cycle}</span>
       ${s.category?`<span class="midot">·</span><span>${catById(s.category)?.label||""}</span>`:""}
       ${s.currency!=="THB"?`<span class="midot">·</span><span class="cur-tag">${s.currency}</span>`:""}
+      ${s.card?`<span class="midot">·</span><span>${escapeHTML(s.card)}</span>`:""}
     </div>
     <div class="c-renew"><span>${fmtDate(renew)} · ${relDate(renew)}</span></div>
   </div>`;
