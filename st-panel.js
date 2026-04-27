@@ -44,7 +44,8 @@ function populatePanel(){
   document.getElementById("i-plan").value    = draft.plan;
   document.getElementById("i-cost").value    = draft.cost;
   document.getElementById("i-renew").value   = draft.renews;
-  document.getElementById("i-card").value    = draft.card||"";
+  document.getElementById("i-card").value        = draft.card||"";
+  document.getElementById("i-card-expiry").value = draft.cardExpiry||"";
   document.getElementById("i-notes").value   = draft.notes||"";
   document.getElementById("i-reminder").value= draft.reminder||0;
   document.getElementById("i-split").value   = draft.splitWith||1;
@@ -125,6 +126,14 @@ window.bindPanelInputs = () => {
   bind("i-name","name"); bind("i-plan","plan");
   bind("i-cost","cost"); bind("i-notes","notes"); bind("i-card","card");
 
+  // auto-format card expiry as MM/YY
+  document.getElementById("i-card-expiry").addEventListener("input", e => {
+    let v = e.target.value.replace(/\D/g,"");
+    if (v.length >= 3) v = v.slice(0,2) + "/" + v.slice(2,4);
+    e.target.value = v;
+    draft.cardExpiry = v;
+  });
+
   document.getElementById("i-reminder").addEventListener("input", e=>draft.reminder=Number(e.target.value)||0);
   document.getElementById("i-split").addEventListener("input", e=>{ draft.splitWith=Math.max(1,Number(e.target.value)||1); refreshPreview(); });
   document.getElementById("i-renew").addEventListener("input", e=>{ draft.renews=e.target.value; refreshPreview(); });
@@ -187,6 +196,7 @@ function savePanel(){
     splitWith:Math.max(1,Number(document.getElementById("i-split").value)||1),
     currency:document.getElementById("i-currency").value||"THB",
     card:document.getElementById("i-card").value.trim(),
+    cardExpiry:document.getElementById("i-card-expiry").value.trim(),
     priceHistory:hist,
   };
 

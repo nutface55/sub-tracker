@@ -40,6 +40,17 @@ window.toTHB      = (cost,cur) => cost*(RATES[cur]||1);
 window.monthlyTHB = s => toTHB(s.cycle==="monthly"?s.cost:s.cost/12, s.currency||"THB")/(s.splitWith||1);
 window.annualTHB  = s => toTHB(s.cycle==="annual"?s.cost:s.cost*12, s.currency||"THB")/(s.splitWith||1);
 window.catById    = id => CATEGORIES.find(c=>c.id===id)||null;
+// returns true if card expiry (MM/YY) is before the renewal date
+window.cardExpiresBefore = (expiry, renewsISO) => {
+  if (!expiry || !renewsISO) return false;
+  const m = expiry.match(/^(\d{1,2})\/(\d{2,4})$/);
+  if (!m) return false;
+  const month = parseInt(m[1],10)-1;
+  const year  = parseInt(m[2],10) + (m[2].length===2 ? 2000 : 0);
+  // card is valid through the last day of the expiry month
+  const cardEnd = new Date(year, month+1, 0); // last day of month
+  return cardEnd < parseDate(renewsISO);
+};
 window.visibleSubs = () => {
   let list = SUBS.slice();
   if(STATE.filter==="active") list=list.filter(s=>s.status==="active");
@@ -104,6 +115,7 @@ window.normSub = s => ({
   splitWith:Number(s.splitWith)||1,
   currency:s.currency||"THB",
   card:s.card||"",
+  cardExpiry:s.cardExpiry||"",
   priceHistory:s.priceHistory||[],
 });
 

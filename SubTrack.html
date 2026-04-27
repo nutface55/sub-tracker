@@ -89,6 +89,7 @@ header.bar{display:flex;align-items:center;justify-content:space-between;gap:16p
 .badge.trial{background:#FFF7ED;color:#C2410C}
 .badge.remind{background:#FEF2F2;color:var(--red)}
 .badge.split{background:var(--chip);color:var(--muted)}
+.badge.card-exp{background:#FFF7ED;color:#b45309}
 [data-dark] .badge.trial{background:#2a1e0e;color:#fb923c}
 [data-dark] .badge.remind{background:#2a1410;color:#f87171}
 .cat-inline{font-size:10px;padding:1px 6px;border-radius:20px;margin-left:6px;vertical-align:1px;font-weight:400}
@@ -642,9 +643,15 @@ footer.foot .dotgap{color:var(--muted-2)}
       <input id="i-trial-end" type="date" />
     </div>
 
-    <div class="field">
-      <label for="i-card">payment card</label>
-      <input id="i-card" type="text" placeholder="e.g. Kasikorn Visa, SCB Black" autocomplete="off" />
+    <div class="row2">
+      <div class="field">
+        <label for="i-card">payment card</label>
+        <input id="i-card" type="text" placeholder="e.g. Kasikorn Visa" autocomplete="off" />
+      </div>
+      <div class="field">
+        <label for="i-card-expiry">card expiry</label>
+        <input id="i-card-expiry" type="text" placeholder="MM/YY" maxlength="5" autocomplete="off" inputmode="numeric" />
+      </div>
     </div>
 
     <div class="field">
@@ -728,11 +735,11 @@ footer.foot .dotgap{color:var(--muted-2)}
   </div>
 </div>
 
-<script src="st-data.js?v=10"></script>
-<script src="st-render.js?v=10"></script>
-<script src="st-panel.js?v=10"></script>
-<script src="st-views.js?v=10"></script>
-<script src="st-init.js?v=10"></script>
+<script src="st-data.js?v=11"></script>
+<script src="st-render.js?v=11"></script>
+<script src="st-panel.js?v=11"></script>
+<script src="st-views.js?v=11"></script>
+<script src="st-init.js?v=11"></script>
 <script>
   // wire shortcuts link after scripts loaded
   document.getElementById("shortcuts-link").onclick = openShortcuts;

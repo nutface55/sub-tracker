@@ -83,6 +83,7 @@ function badges(s){
   if(s.trial) b+=`<span class="badge trial">trial</span>`;
   if(s.reminder>0){ const d=daysBetween(TODAY,parseDate(s.renews)); if(d>=0&&d<=s.reminder) b+=`<span class="badge remind">!${d}d</span>`; }
   if(s.splitWith>1) b+=`<span class="badge split">÷${s.splitWith}</span>`;
+  if(cardExpiresBefore(s.cardExpiry, s.renews)) b+=`<span class="badge card-exp" title="card expires before next renewal">card exp</span>`;
   return b;
 }
 
