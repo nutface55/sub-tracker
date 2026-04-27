@@ -112,7 +112,8 @@ header.bar{display:flex;align-items:center;justify-content:space-between;gap:16p
 .col-cycle{width:9%}
 .col-monthly{width:11%}
 .col-annual-cell{width:11%}
-.col-renew{width:17%}
+.col-renew{width:15%}
+.col-card-exp{width:9%}
 .name-cell{display:flex;align-items:center;gap:8px;min-width:0}
 .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;box-shadow:inset 0 0 0 .5px rgba(0,0,0,.15)}
 .name-cell .label{font-weight:500;letter-spacing:-.005em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -520,6 +521,7 @@ footer.foot .dotgap{color:var(--muted-2)}
           <th class="col-monthly num">monthly <span style="opacity:.5;font-size:9px">↓</span></th>
           <th class="num">annual</th>
           <th class="col-renew">next renewal</th>
+          <th class="col-card-exp">card</th>
           <th></th>
         </tr>
       </thead>
@@ -735,11 +737,11 @@ footer.foot .dotgap{color:var(--muted-2)}
   </div>
 </div>
 
-<script src="st-data.js?v=11"></script>
-<script src="st-render.js?v=11"></script>
-<script src="st-panel.js?v=11"></script>
-<script src="st-views.js?v=11"></script>
-<script src="st-init.js?v=11"></script>
+<script src="st-data.js?v=12"></script>
+<script src="st-render.js?v=12"></script>
+<script src="st-panel.js?v=12"></script>
+<script src="st-views.js?v=12"></script>
+<script src="st-init.js?v=12"></script>
 <script>
   // wire shortcuts link after scripts loaded
   document.getElementById("shortcuts-link").onclick = openShortcuts;
