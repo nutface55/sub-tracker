@@ -32,9 +32,10 @@ window.renderStats = () => {
     <button class="icon-tool" id="btn-rates" title="exchange rates">₿</button>
     <button class="icon-tool" id="btn-shortcuts" title="keyboard shortcuts">?</button>
   `;
-  document.getElementById("btn-dark").onclick  = toggleDark;
-  document.getElementById("btn-rates").onclick = openRates;
-  document.getElementById("stat-monthly").onclick = openBudget;
+  document.getElementById("btn-dark").onclick      = toggleDark;
+  document.getElementById("btn-rates").onclick     = openRates;
+  document.getElementById("btn-shortcuts").onclick = openShortcuts;
+  document.getElementById("stat-monthly").onclick  = openBudget;
 };
 
 // ── tabs ──────────────────────────────────────────────────────────────

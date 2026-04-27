@@ -5,7 +5,7 @@ window.initApp = async () => {
 
   // ── show mobile header tools on small screens ──────────────────────
   const updateHeaderTools = () => {
-    const isMobile = window.innerWidth <= 760;
+    const isMobile = window.innerWidth <= 767;
     const ht = document.getElementById("header-tools");
     if(ht) ht.style.display = isMobile ? "flex" : "none";
   };
@@ -58,7 +58,7 @@ window.initApp = async () => {
 
   // ── footer actions ─────────────────────────────────────────────────
   document.getElementById("export").onclick = () => {
-    const cols=["name","plan","cycle","cost","currency","color","status","renews","category","notes","trial","trialEnds","reminder","splitWith"];
+    const cols=["name","plan","cycle","cost","currency","color","status","renews","category","notes","trial","trialEnds","reminder","splitWith","card","cardExpiry"];
     const rows=[cols.join(",")].concat(SUBS.map(s=>cols.map(c=>JSON.stringify(s[c]??'')).join(",")));
     const blob=new Blob([rows.join("\n")],{type:"text/csv"});
     const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="subtrack.csv"; a.click();

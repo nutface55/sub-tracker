@@ -129,7 +129,7 @@ window.setView = v => {
   const cards= document.getElementById("cards");
   const chart= document.getElementById("chart-section");
   const cal  = document.getElementById("calendar-section");
-  const isMobile = window.innerWidth <= 760;
+  const isMobile = window.innerWidth <= 767;
 
   tbl.style.display  = (v==="list"&&!isMobile) ? "" : "none";
   cards.style.display= (v==="list"&&isMobile)  ? "" : "none";
